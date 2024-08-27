@@ -1,9 +1,11 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:egm/bloc/main/main_bloc.dart';
 import 'package:egm/presentation/screens/events.dart';
 import 'package:egm/presentation/screens/profile.dart';
 import 'package:egm/presentation/screens/search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -13,41 +15,41 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
-
   final List<Widget> _screens = [
     const EventsScreen(),
     const SearchScreen(),
     const ProfileScreen(),
   ];
 
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Event Management App'),
-        centerTitle: true,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-        onTap: _onTabTapped,
-      ),
-      body: _screens[_currentIndex],
+    return BlocBuilder<MainBloc, MainState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Event Management App'),
+            centerTitle: true,
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.add),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: state.tabIndex,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.search), label: 'Search'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.person), label: 'Profile'),
+            ],
+            onTap: (index) {
+              context.read<MainBloc>().add(TabChangedEvent(tabIndex: index));
+            },
+          ),
+          body: _screens[state.tabIndex],
+        );
+      },
     );
   }
 }
